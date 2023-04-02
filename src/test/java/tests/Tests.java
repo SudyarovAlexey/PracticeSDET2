@@ -4,9 +4,10 @@ import io.qameta.allure.Description;
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import pages.AddCustomerPage;
+import pages.CustomersPage;
 import pages.ManagerPage;
 import utils.Webdriver;
 
@@ -17,29 +18,37 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Tests {
-    WebDriver driver = Webdriver.getChromeDriver();
 
-    ManagerPage managerPage = new ManagerPage(driver);
+    public String mainPageUrl = "https://www.globalsqa.com/angularJs-protractor/BankingProject/#/manager";
+
+    WebDriver driver;
+    ManagerPage managerPage;
+    AddCustomerPage addCustomerPage;
+    CustomersPage customersPage;
 
     @BeforeMethod
-    private void setup() {
-        driver.get(managerPage.pageUrl);
+    public void setup() {
+        driver = Webdriver.getChromeDriver();
+        driver.get(mainPageUrl);
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
-    }
-
-    @Test
-    @Description("Открытие главной страницы")
-    public void openManagerPage() {
-        Assert.assertTrue(managerPage.getHeader().isDisplayed());
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(60));
+        managerPage = new ManagerPage(driver);
+        addCustomerPage = new AddCustomerPage(driver);
+        customersPage = new CustomersPage(driver);
     }
 
     @Test
     @Description("Добавление пользователя")
     public void addCustomer() {
-        managerPage.goToTabCustomerAdd();
-        managerPage.inputCustomerData("John", "Doe", "2000");
-        String tableData = managerPage.getTableData();
+        managerPage.goToAddCustomerPage();
+        //В данном случае title-ы одинаковые. Поставил в качестве демонстрации проверки
+        /*замечаний о выносе переменных в поля не было.
+         Но можно вынести все в виде полей private static final TITLE_NAME = "XYZ Bank" */
+        Assert.assertEquals(driver.getTitle(), "XYZ Bank");
+        addCustomerPage.inputDataAndCreateCustomer("John", "Doe", "2000");
+        addCustomerPage.closeAlert();
+        addCustomerPage.goToCustomersPage();
+        String tableData = customersPage.getTableData();
         String expectedData = "John Doe 2000";
         Assert.assertTrue(tableData.contains(expectedData));
     }
@@ -47,7 +56,9 @@ public class Tests {
     @Test
     @Description("Сортировка клиентов по имени")
     public void checkSortingList() {
-        List<String> actualList = managerPage.getSortedChecklist();
+        managerPage.goToCustomersPage();
+        customersPage.sortCustomerList();
+        List<String> actualList = customersPage.getSortedCustomerList();
         List<String> expectedList = new ArrayList<>(actualList);
         expectedList.sort(Comparator.reverseOrder());
         Assert.assertEquals(actualList, expectedList);
@@ -56,9 +67,17 @@ public class Tests {
     @Test
     @Description("Поиск клиента по имени")
     public void searchCustomerByName() {
-        List<String> actualList = managerPage.findCustomer("Harry");
-        List<String> expected = Arrays.asList("Harry", "Potter", "E725JB", "1004 1005 1006");
-        Assert.assertEquals(actualList, expected);
+        managerPage.goToAddCustomerPage();
+        Assert.assertEquals(driver.getTitle(), "XYZ Bank");
+        addCustomerPage.inputDataAndCreateCustomer("John", "Doe", "2000");
+        addCustomerPage.closeAlert();
+        addCustomerPage.goToCustomersPage();
+        customersPage.inputCustomerDataForSearch("John");
+        int actualSearchListSize = customersPage.getSearchListSize();
+        Assert.assertEquals(actualSearchListSize, 1);
+        List<String> actualList = customersPage.getSearchedCustomerData();
+        List<String> expectedList = Arrays.asList("John", "Doe", "2000");
+        Assert.assertEquals(actualList, expectedList);
     }
 
     @AfterClass
