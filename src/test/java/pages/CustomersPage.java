@@ -1,6 +1,7 @@
 package pages;
 
 import io.qameta.allure.Step;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -24,8 +25,12 @@ public class CustomersPage {
     @FindBy(xpath = "//tbody//tr//td[1]")
     private List<WebElement> firstColumnElements;
 
-    @FindBy(xpath = "//tbody//tr[1]//td")
-    private List<WebElement> firstRowElements;
+    private String rowNumberTemplate = "//tbody//tr[substitution]//td";
+
+    private List<WebElement> generateXpathRowNumber(String xpathTemplate, int substitutionValue){
+        return driver.findElements(By.xpath(xpathTemplate
+                .replace("substitution", String.valueOf(substitutionValue))));
+    }
 
     @FindBy(xpath = "//tbody")
     private WebElement table;
@@ -55,9 +60,9 @@ public class CustomersPage {
     }
 
     @Step("Получение данных поиска клиента")
-    public List<String> getSearchedCustomerData() {
+    public List<String> getSearchedCustomerData(int rowNumber) {
         List<String> customerDataList = new ArrayList<>();
-        for (WebElement element : firstRowElements) {
+        for (WebElement element : generateXpathRowNumber(rowNumberTemplate, rowNumber)) {
             customerDataList.add(element.getText());
         }
         customerDataList.removeAll(customerDataList

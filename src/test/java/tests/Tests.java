@@ -73,7 +73,8 @@ public class Tests {
         customersPage.inputCustomerDataForSearch("John");
         int actualSearchListSize = customersPage.getSearchListSize();
         Assert.assertEquals(actualSearchListSize, 1);
-        List<String> actualList = customersPage.getSearchedCustomerData();
+        int rowNumberForSearch = 1;
+        List<String> actualList = customersPage.getSearchedCustomerData(rowNumberForSearch);
         List<String> expectedList = Arrays.asList("John", "Doe", "2000");
         Assert.assertEquals(actualList, expectedList);
     }
