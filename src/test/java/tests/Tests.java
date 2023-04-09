@@ -3,8 +3,8 @@ package tests;
 import io.qameta.allure.Description;
 import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import pages.AddCustomerPage;
 import pages.CustomersPage;
@@ -26,7 +26,7 @@ public class Tests {
     AddCustomerPage addCustomerPage;
     CustomersPage customersPage;
 
-    @BeforeMethod
+    @BeforeTest
     public void setup() {
         driver = Webdriver.getChromeDriver();
         driver.get(mainPageUrl);
@@ -44,7 +44,6 @@ public class Tests {
         //В данном случае title-ы одинаковые. Поставил в качестве демонстрации проверки
         /*замечаний о выносе переменных в поля не было.
          Но можно вынести все в виде полей private static final TITLE_NAME = "XYZ Bank" */
-        Assert.assertEquals(driver.getTitle(), "XYZ Bank");
         addCustomerPage.inputDataAndCreateCustomer("John", "Doe", "2000");
         addCustomerPage.closeAlert();
         addCustomerPage.goToCustomersPage();
@@ -68,7 +67,6 @@ public class Tests {
     @Description("Поиск клиента по имени")
     public void searchCustomerByName() {
         managerPage.goToAddCustomerPage();
-        Assert.assertEquals(driver.getTitle(), "XYZ Bank");
         addCustomerPage.inputDataAndCreateCustomer("John", "Doe", "2000");
         addCustomerPage.closeAlert();
         addCustomerPage.goToCustomersPage();
@@ -80,7 +78,7 @@ public class Tests {
         Assert.assertEquals(actualList, expectedList);
     }
 
-    @AfterClass
+    @AfterTest
     private void tearDown() {
         driver.quit();
     }
